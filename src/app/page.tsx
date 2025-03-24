@@ -238,11 +238,11 @@ export default function Home() {
             <div className="text-sm text-gray-500 dark:text-gray-400">With EigenLayer</div>
           </div>
           <div className="flex flex-col items-center">
-            <div className="text-3xl font-bold text-emerald-500">25k+</div>
+            <div className="text-3xl font-bold text-emerald-500">35k+</div>
             <div className="text-sm text-gray-500 dark:text-gray-400">Validators</div>
           </div>
           <div className="flex flex-col items-center">
-            <div className="text-3xl font-bold text-emerald-500">800k+</div>
+            <div className="text-3xl font-bold text-emerald-500">1M+</div>
             <div className="text-sm text-gray-500 dark:text-gray-400">ETH Staked</div>
           </div>
         </motion.div>
