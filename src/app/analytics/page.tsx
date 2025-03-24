@@ -134,7 +134,7 @@ const generateAvgRewardsData = () => {
         barPercentage: 0.8,
       },
       {
-        label: 'EigenLayer APY Boost',
+        label: 'EigenLayer APY',
         data: [1.2, 1.1, 1.3, 1.2, 1.4, 1.2, 1.3, 1.3, 1.2, 1.3, 1.4, 1.3],
         backgroundColor: '#5BC470',
         borderRadius: 4,
@@ -147,7 +147,7 @@ const generateAvgRewardsData = () => {
 
 const generateDistributionData = () => {
   return {
-    labels: ['Solo Stakers', 'Liquid Staking', 'Exchanges', 'EigenLayer Restaking'],
+    labels: ['Ethereum Staking', 'EigenDA Staking', 'Cyber', 'EigenLayer Restaking'],
     datasets: [
       {
         data: [22, 34, 18, 26],
