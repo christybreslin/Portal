@@ -31,7 +31,7 @@ export default function Home() {
     <div className="min-h-screen bg-gradient-to-br from-[#e0f5e9] to-[#e8eef2]">
       <header className="container mx-auto px-4 py-6">
         <div className="flex items-center justify-between">
-          <Link href="/" className="text-2xl font-serif text-[#1a2e22] font-medium">
+          <Link href="/" className="text-4xl font-serif text-[#1a2e22] font-medium">
             Bitwise
           </Link>
 
@@ -78,7 +78,7 @@ export default function Home() {
               variants={fadeIn}
               className="text-[#1a2e22] text-7xl md:text-8xl font-bold mb-4"
             >
-              ETH
+    
             </motion.h1>
 
             <motion.h2
