@@ -19,6 +19,7 @@ import {
   Legend,
   Filler,
   ChartOptions,
+  TooltipItem,
 } from "chart.js";
 import { Line, Bar, Doughnut, PolarArea } from "react-chartjs-2";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -71,13 +72,6 @@ const networkStats = {
   averageEigenAPY: 4.68, // %
 };
 
-// EigenLayer vs. Standard distribution for filled bars
-const validatorDistribution = {
-  standard: 459832,
-  eigenLayer: 398414,
-  maxValidators: 1000000, // For visualization purposes
-};
-
 // Generate monthly staking data
 const generateMonthlyStakingData = () => {
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -101,7 +95,7 @@ const generateMonthlyStakingData = () => {
         label: 'Total ETH Staked',
         data: baseData.map(val => val * 32 / 1000000), // Convert to millions of ETH
         borderColor: '#0070F3',
-        backgroundColor: 'rgba(0, 112, 243, 0.1)',
+        backgroundColor: 'rgba(0, 112, 243, 0.4)',
         fill: true,
         tension: 0.4,
         order: 1,
@@ -110,7 +104,7 @@ const generateMonthlyStakingData = () => {
         label: 'EigenLayer Restaked ETH',
         data: eigenLayerData.map(val => val * 32 / 1000000), // Convert to millions of ETH
         borderColor: '#5BC470',
-        backgroundColor: 'rgba(91, 196, 112, 0.1)',
+        backgroundColor: 'rgba(91, 196, 112, 0.4)',
         fill: true,
         tension: 0.4,
         order: 2,
@@ -182,6 +176,32 @@ const generateOperatorsData = () => {
   };
 };
 
+// Generate dummy data for charts
+const generateAPRData = () => {
+  const labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  return {
+    labels,
+    datasets: [
+      {
+        label: 'Ethereum APR (%)',
+        data: labels.map(() => 3 + (Math.random() * 0.2 - 0.1)), // 3% ± 0.1%
+        borderColor: '#3B82F6', // blue
+        backgroundColor: 'rgba(59, 130, 246, 0.2)',
+        tension: 0.4,
+        fill: true,
+      },
+      {
+        label: 'EigenLayer APR (%)',
+        data: labels.map(() => 0.6 + (Math.random() * 0.2 - 0.1)), // 0.6% ± 0.1%
+        borderColor: '#5BC470', // emerald
+        backgroundColor: 'rgba(91, 196, 112, 0.2)',
+        tension: 0.4,
+        fill: true,
+      },
+    ],
+  };
+};
+
 // Chart options
 const lineChartOptions: ChartOptions<'line'> = {
   responsive: true,
@@ -206,16 +226,23 @@ const lineChartOptions: ChartOptions<'line'> = {
       backgroundColor: 'rgba(0, 31, 63, 0.8)',
       padding: 10,
       cornerRadius: 6,
+      callbacks: {
+        label: function(tooltipItem: TooltipItem<'line'>) {
+          return `${tooltipItem.dataset.label}: ${tooltipItem.raw}%`;
+        }
+      }
     },
   },
   scales: {
     y: {
       beginAtZero: true,
+      stacked: true,
       grid: {
         color: 'rgba(0, 0, 0, 0.05)',
       },
     },
     x: {
+      stacked: true,
       grid: {
         display: false,
       },
@@ -246,8 +273,31 @@ const doughnutOptions: ChartOptions<'doughnut'> = {
       backgroundColor: 'rgba(0, 31, 63, 0.8)',
       padding: 10,
       cornerRadius: 6,
+      callbacks: {
+        label: function(tooltipItem: TooltipItem<'doughnut'>) {
+          return `${tooltipItem.label}: ${tooltipItem.raw}%`;
+        }
+      }
     },
   },
+};
+
+const polarOptions = {
+  ...doughnutOptions,
+  plugins: {
+    ...doughnutOptions.plugins!,
+    legend: {
+      ...doughnutOptions.plugins!.legend,
+      position: 'right' as const,
+    }
+  },
+  scales: {
+    r: {
+      ticks: {
+        display: false
+      }
+    }
+  }
 };
 
 // Performance metrics data
@@ -295,12 +345,42 @@ function MetricCard({ title, value, subtitle, icon }: { title: string; value: st
   );
 }
 
+// Update the StatCard component type
+interface StatCardProps {
+  title: string;
+  value: string;
+  suffix: string;
+  description: string;
+  icon: React.ReactNode;
+  color: string;
+}
+
+const StatCard = ({ title, value, suffix, description, icon, color }: StatCardProps) => (
+  <div className="w-full">
+    <Card className="h-full card-hover">
+      <CardContent className="p-6">
+        <div className="flex items-start justify-between">
+          <div>
+            <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">{title}</h3>
+            <div className="flex items-baseline">
+              <p className="text-3xl font-bold">{value}</p>
+              <span className="ml-1 text-xl font-medium text-gray-500 dark:text-gray-400">{suffix}</span>
+            </div>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{description}</p>
+          </div>
+          <div className={`p-3 rounded-lg ${color}`}>
+            {icon}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  </div>
+);
+
 export default function AnalyticsPage() {
   const [activeView, setActiveView] = useState("overview");
-  const [monthlyData, setMonthlyData] = useState(generateMonthlyStakingData());
-  const [rewardsData, setRewardsData] = useState(generateAvgRewardsData());
-  const [distributionData, setDistributionData] = useState(generateDistributionData());
-  const [operatorsData, setOperatorsData] = useState(generateOperatorsData());
+  const [monthlyData] = useState(generateMonthlyStakingData());
+  const [distributionData] = useState(generateDistributionData());
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -443,84 +523,6 @@ export default function AnalyticsPage() {
     }
   };
   
-  const doughnutOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        position: 'right' as const,
-        labels: {
-          font: {
-            family: 'Geist, sans-serif',
-            size: 12
-          },
-          usePointStyle: true,
-          boxWidth: 6,
-          boxHeight: 6,
-        }
-      },
-      tooltip: {
-        backgroundColor: 'rgba(0, 31, 63, 0.8)',
-        padding: 12,
-        cornerRadius: 10,
-        titleFont: {
-          family: 'Geist, sans-serif',
-          size: 13,
-          weight: 'bold' as const,
-        },
-        bodyFont: {
-          family: 'Geist, sans-serif',
-          size: 12
-        },
-        callbacks: {
-          label: function(context: any) {
-            return context.label + ': ' + context.raw + '%';
-          }
-        }
-      }
-    },
-  };
-  
-  const polarOptions = {
-    ...doughnutOptions,
-    plugins: {
-      ...doughnutOptions.plugins,
-      legend: {
-        ...doughnutOptions.plugins.legend,
-        position: 'right' as const,
-      }
-    },
-    scales: {
-      r: {
-        ticks: {
-          display: false
-        }
-      }
-    }
-  };
-  
-  const StatCard = ({ title, value, suffix, description, icon, color }: any) => (
-    <div className="w-full">
-      <Card className="h-full card-hover">
-        <CardContent className="p-6">
-          <div className="flex items-start justify-between">
-            <div>
-              <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">{title}</h3>
-              <div className="flex items-baseline">
-                <p className="text-3xl font-bold">{value}</p>
-                <span className="ml-1 text-xl font-medium text-gray-500 dark:text-gray-400">{suffix}</span>
-              </div>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{description}</p>
-            </div>
-            <div className={`p-3 rounded-lg ${color}`}>
-              {icon}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  );
-  
   // Loading skeleton component
   const ChartSkeleton = () => (
     <div className="w-full h-full flex items-center justify-center">
@@ -630,18 +632,12 @@ export default function AnalyticsPage() {
                 <motion.div variants={itemVariants}>
                   <Card className="shadow-sm border border-gray-100 dark:border-gray-800">
                     <CardHeader>
-                      <CardTitle>APR Comparison</CardTitle>
+                      <CardTitle>APR Performance</CardTitle>
                       <CardDescription>Base ETH staking vs. with EigenLayer</CardDescription>
                     </CardHeader>
                     <CardContent>
                       <div className="h-[350px]">
-                        {isLoading ? (
-                          <div className="flex items-center justify-center h-full">
-                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-vibrant-green"></div>
-                          </div>
-                        ) : (
-                          <Line data={rewardsData} options={lineChartOptions} />
-                        )}
+                        <Line data={generateAPRData()} options={lineChartOptions} />
                       </div>
                     </CardContent>
                   </Card>
