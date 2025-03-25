@@ -395,7 +395,7 @@ export default function DashboardPage() {
         >
           <h1 className="text-3xl font-bold tracking-tight text-[#1a2e22]">Dashboard</h1>
           <p className="text-gray-700 mt-2">
-            View performance metrics and analytics for your validators
+            View and manage your Validators
           </p>
         </motion.div>
 
